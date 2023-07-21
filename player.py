@@ -2,14 +2,12 @@ import Globals
 
 from classes import *
 
+import timeit
+
 from GameMaker.Physics import Movement2D
 
-class Client():
-	def __init__(self,connection):
-		pass
-
 class Player():
-	def __init__(self,x,y,camera = Vector3(0,0,0)):
+	def __init__(self,username,x,y,camera = Vector3(0,0,0)):
 		self.size = 55
 		self.health = 100
 
@@ -17,9 +15,10 @@ class Player():
 		self.velocity = 0
 
 		self.focused = True
+		self.username = username
 
 		self.spaceship = Spaceship(self.size)
-		self.mothership = Mothership("Sree Raneesh Akella",Vector2(0,0),90)
+		self.mothership = Mothership(self.username if len(self.username) < 16 else self.username[:13] + "...",Vector2(0,0),90)
 
 		self.position = Vector2(0,0)
 
@@ -51,9 +50,7 @@ class Player():
 			self.last_shoot = self.ticks
 			self.left_right_shot = not self.left_right_shot
 
-			self.velocity -= 1.5
-
-			if self.velocity < -1.5: self.velocity = -1.5
+			self.velocity *= 0.5
 
 	def MoveCamera(self,target,smoothing=20):
 		self.camera += AngleToPosition(Angle2(self.camera, target), Distance2(self.camera, target) / smoothing)
@@ -91,10 +88,12 @@ class Player():
 
 		self.collision = None
 
-	def screen_position(self,window):
+	def screen_position(self,window,position=[]):
+		if len(position) == 0: position = [self.position.x, self.position.y]
+
 		return RectStruct(
-			window.get_width()/2 + (self.position.x - self.camera.x), 
-			window.get_height()/2 - (self.position.y - self.camera.z), 
+			window.get_width()/2 + (position[0] - self.camera.x), 
+			window.get_height()/2 - (position[1] - self.camera.z), 
 			self.size * self.camera.y/10,
 			self.size * self.camera.y/10,
 		)
@@ -125,3 +124,11 @@ class Player():
 		self.spaceship.draw(window,self.screen_position(window),360 - self.angle,self.velocity)
 
 		self.mothership.draw(window,self)
+
+	def dump(self):
+		return [
+			round(self.position.x,2),
+			round(self.position.y,2),
+			round(self.angle,2),
+			round(self.velocity,2),
+		]

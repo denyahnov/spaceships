@@ -1,13 +1,79 @@
 from currency import *
 
+class LinkedButton():
+	def __init__(self,text,image,parent,offset,size,hover_scaling=1.3,clicked_scaling=1.1):
+		self.text = Text(text,[0,0],color=[255] * 3,center=[gm.CENTER, gm.CENTER])
+		self.size = [0,0] + size
+		self.image = RotatedImage(image,self.size)
+		self.parent = parent
+		self.offset = offset
+
+		self.hover_scaling = hover_scaling
+		self.clicked_scaling = clicked_scaling
+
+		self.status = gm.NONE
+
+	def draw(self):
+		return [self.image, self.text]
+
+	def update(self):
+		self.image.x = self.parent.x + self.offset[0]
+		self.image.y = self.parent.y + self.offset[1]
+
+		x,y = pg.mouse.get_pos()
+		click = pg.mouse.get_pressed(num_buttons=3)[0]
+
+		w = (x >= self.image.x) and (x <= self.image.x + self.image.w)
+		h = (y >= self.image.y) and (y <= self.image.y + self.image.h)
+
+		self.status = gm.HELD if w and h and click and self.status in [gm.PRESSED,gm.HELD] else gm.PRESSED if w and h and click else gm.RELEASED if not click and self.status in [gm.PRESSED,gm.HELD] else gm.HOVERED if w and h else gm.NONE
+
+		if self.status in [gm.HOVERED,gm.RELEASED]:
+			
+			self.image.w = self.size[2] * self.hover_scaling
+			self.image.h = self.size[3] * self.hover_scaling
+
+			self.image.x -= (self.image.w - self.size[2]) / 2
+			self.image.y -= (self.image.h - self.size[3]) / 2
+
+			self.image.image = pg.transform.scale(self.image.image, (self.image.w, self.image.h))
+		elif self.status in [gm.PRESSED,gm.HELD,gm.RELEASED]:
+			
+			self.image.w = self.size[2] * self.clicked_scaling
+			self.image.h = self.size[3] * self.clicked_scaling
+
+			self.image.x -= (self.image.w - self.size[2]) / 2
+			self.image.y -= (self.image.h - self.size[3]) / 2
+
+			self.image.image = pg.transform.scale(self.image.image, (self.image.w, self.image.h))
+		else:
+			self.image.w = self.size[2]
+			self.image.h = self.size[3]
+
+			self.image.image = pg.transform.scale(self.image.image, (self.image.w, self.image.h))
+
+		self.text.x = self.image.x + self.image.w / 2
+		self.text.y = self.image.y + self.image.h / 2
+
+class Checkbox():
+	def __init__(self,position):
+		self.position = position
+		self.background = RotatedImage("assets\\icon_ui_square.png",self.position)
+
+
 titanium 	= Titanium(0,0)
 gear 		= Gear(0,40)
 plasma 		= Plasma(0,80)
 magnesium 	= Magnesium(0,120)
 
-background = AlphaRectangle([0,0,2000,2000],color=[40,40,50,0])
-
 inventory = Currency("",RotatedImage("assets\\icon_ui_background.png",[-500,160,500,400]),None,"",position=[390,160],hide=[-500,160])
+
+play_button = LinkedButton("Continue", "assets\\icon_ui_button.png",inventory.icon,[138,110],[220,60])
+settings_button = LinkedButton("Settings", "assets\\icon_ui_button.png",inventory.icon,[138,190],[220,60])
+exit_button = LinkedButton("Exit", "assets\\icon_ui_button.png",inventory.icon,[138,270],[220,60])
+
+global OPEN
+global FOCUSED
 
 OPEN = True
 FOCUSED = False
@@ -15,6 +81,9 @@ FOCUSED = False
 ALPHA = 160,20
 
 def Animate():
+	global OPEN
+	global FOCUSED
+
 	titanium.Animate(OPEN and not FOCUSED)
 	gear.Animate(OPEN and not FOCUSED)
 	plasma.Animate(OPEN and not FOCUSED)
@@ -22,14 +91,21 @@ def Animate():
 
 	inventory.Animate(FOCUSED)
 
-	if FOCUSED and background.color[3] < ALPHA[0]:
-		background.color[3] += ALPHA[1]
-	if not FOCUSED and background.color[3] > 0:
-		background.color[3] -= ALPHA[1]
+	play_button.update()
+	settings_button.update()
+	exit_button.update()
 
-def DrawUI(window,true=True):
+def DrawUI(window):
+	global FOCUSED
+
 	Animate()
 
-	window.draw([background,inventory.icon],gm.GUI)
+	if play_button.status in [gm.PRESSED, gm.HELD]:
+		FOCUSED = False
+
+	if exit_button.status in [gm.PRESSED, gm.HELD]:
+		window.RUNNING = False
+
+	window.draw([inventory.icon] + play_button.draw() + settings_button.draw() + exit_button.draw(),gm.GUI)
 
 	window.draw([titanium,gear,plasma,magnesium],gm.GUI)

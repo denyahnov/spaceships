@@ -24,6 +24,18 @@ def GenerateAsteroids(amount,pos_range):
 def GenerateStars(amount,pos_range):
 	return AssetList([Star( Vector2(random.randint(-pos_range,pos_range), random.randint(-pos_range,pos_range)), size=random.uniform(0.5,1.5), angle=random.randint(0,360)) for i in range(amount)])
 
+def BrokenAsteroid():
+	return AssetList([
+		Asteroid(
+			position=self.parent.position,
+			size=self.parent.size,
+			angle=self.parent.angle,
+			velocity=self.parent.velocity,
+			rotation_speed=self.parent.rotation_speed,
+			path=f"assets\\draw_asteroid_{i+2}.png"
+		) for i in range(4)
+	])
+
 class AssetList():
 	def __init__(self,items):
 		self.items = items

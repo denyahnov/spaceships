@@ -16,16 +16,30 @@ settings.Load()
 player = Player(settings.Get("szAccountName"),window.H_WIDTH,window.H_HEIGHT)
 arrow = Arrow()
 
+servers = network.FindServers()
+
+if len(servers) == 0: 
+	exit("Network -> No Available Servers")
+
+chosen_server = servers[0]
+
 client = network.Client(player)
-client.Connect(network.Get_IP(),65432)
+client.Connect(chosen_server["Address"],65432)
+
+random.seed(chosen_server["Seed"])
 
 stars = GenerateStars(int(MAP_SIZE * 1.5),MAP_SIZE)
 asteroids = GenerateAsteroids(int(MAP_SIZE * 0.25),MAP_SIZE)
 
+for asteroid in asteroids.items:
+	asteroid.draw_image.rotation += asteroid.rotation_speed * chosen_server["Ticks"]
+
+	asteroid.position += AngleToPosition(90 - asteroid.angle, asteroid.velocity * chosen_server["Ticks"])
+
 other_players = {}
 
-while window.RUNNING:
-	for enemy, x, y, angle, velocity in client.data:
+while window.RUNNING and client.CONNECTED:
+	for enemy, x, y, angle, velocity in client.data["Players"]:
 		if enemy not in other_players: 
 			other_players[enemy] = Spaceship(55)
 
@@ -41,10 +55,10 @@ while window.RUNNING:
 
 	ui.DrawUI(window)
 
-	stars.draw(window.screen,player)
-	asteroids.draw(window.screen,player)
+	stars.draw(window.screen,player,client.data["Tick"])
+	asteroids.draw(window.screen,player,client.data["Tick"])
 
-	player.MoveTick(window,asteroids,ui.FOCUSED)
+	player.MoveTick(window,ui.FOCUSED)
 
 	window.draw(player,gm.FOREGROUND)
 

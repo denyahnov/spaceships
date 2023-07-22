@@ -41,10 +41,10 @@ class AssetList():
 		self.items = items
 
 		try:
-			items[0].MoveTick
-			self.move_tick = True
+			items[0].Move
+			self.should_move = True
 		except:
-			self.move_tick = False
+			self.should_move = False
 
 		try:
 			items[0].collision
@@ -52,9 +52,10 @@ class AssetList():
 		except:
 			self.collision_check = False
 
-	def draw(self,window,player):
+	def draw(self,window,player,tick):
 		for item in self.items:
-			if self.move_tick: item.MoveTick()
+
+			if self.should_move: item.Move(tick)
 
 			if self.collision_check: item.Collide(player,window)
 	
@@ -131,7 +132,8 @@ class Currency():
 class Asteroid():
 	"""Base Asteroid Class"""
 	def __init__(self,position,angle=0,size=1,velocity=0.05,rotation_speed=0.1,path="assets\\draw_asteroid_1.png"):
-		self.position = position
+		self.start_position = position
+		self.position = self.start_position
 		self.size = size
 		self.angle = angle
 		self.draw_image = RotatedImage(path,[position.x,position.y,60*size,60*size],rotation=self.angle)
@@ -143,21 +145,22 @@ class Asteroid():
 
 		self.collision = None
 
-	def draw(self,window):
+	def draw(self,window,tick):
+		self.position = self.start_position + AngleToPosition(90 - self.angle,self.velocity * tick)
+
 		self.draw_image.x = self.position.x
 		self.draw_image.y = self.position.y
 
 		self.draw_image.w = 60 * self.size
 		self.draw_image.h = 60 * self.size
 
-		self.draw_image.rotation = self.angle
+		self.draw_image.rotation = self.angle + self.rotation_speed * tick
 
 		self.draw_image.draw(window)
 
-	def MoveTick(self):
-		self.draw_image.rotation += self.rotation_speed
-
-		self.position += AngleToPosition(90 - self.angle,self.velocity)
+	def Move(self,tick):
+		self.position = self.start_position + AngleToPosition(90 - self.angle,self.velocity * tick)
+		self.draw_image.rotation = self.angle + self.rotation_speed * tick
 
 	def Collide(self,player,window):
 		size = player.screen_position(window)
@@ -174,7 +177,7 @@ class Star():
 
 		self.title = "Star"
 
-	def draw(self,window):
+	def draw(self,window,tick):
 		self.draw_image.x = self.position.x
 		self.draw_image.y = self.position.y
 

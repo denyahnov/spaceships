@@ -55,7 +55,7 @@ class Player():
 	def MoveCamera(self,target,smoothing=20):
 		self.camera += AngleToPosition(Angle2(self.camera, target), Distance2(self.camera, target) / smoothing)
 
-	def MoveTick(self,window,asteroids,ui_focused):
+	def MoveTick(self,window,ui_focused):
 		size = self.screen_position(window.screen)
 
 		if self.collision != None:

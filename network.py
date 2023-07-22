@@ -3,8 +3,50 @@ import socket
 from time import sleep
 from threading import Thread
 from traceback import print_exc
+from multiprocessing.pool import ThreadPool
 
-TPS = 1 / 20
+TPS = 1 / 60
+
+def FindServers(search_range=10):
+	ip = Get_IP()
+	base,end = ip.split('.')[:-1], int(ip.split('.')[-1])
+
+	possiblities = [".".join(base + [str(abs(end + i))]) for i in range(-search_range, search_range)]
+	
+	with ThreadPool(processes = 25) as pool:
+		return [result for result in pool.map(CheckServer,possiblities) if result["Response"]]
+
+def CheckServer(host):
+	HOST, PORT = host, 65432
+
+	try:
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+			s.settimeout(1.0)
+
+			s.connect((HOST, PORT))
+
+			s.send(b"get")
+
+			data = s.recv(1024).decode("utf-8").lower()
+
+			if "valid" in data:
+				return {
+					"Response": 1,
+					"Address": HOST,
+					"Seed": int(data.split(":")[1]),
+					"Ticks": int(data.split(":")[2]),
+				}
+
+	except ConnectionRefusedError:
+		pass
+	except TimeoutError:
+		pass
+	except:
+		print_exc()
+
+	return {
+		"Response": 0
+	}
 
 def Get_IP():
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -56,6 +98,7 @@ class Client():
 		try:
 			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 				s.connect((HOST, PORT))
+				s.send(b"join")
 
 				print("Connecting -> {}:{}".format(HOST,PORT))
 

@@ -46,7 +46,7 @@ class Player():
 		if true and self.ticks > self.last_shoot + self.shoot_cooldown:
 			offset = AngleToPosition(90 - self.angle + (90 if self.left_right_shot else -90), 8)
 
-			self.projectiles["Laser"].append(Laser(self.position + offset,self.angle))
+			self.projectiles["Laser"].append(Laser(self.ticks,self.position + offset,self.angle))
 			self.last_shoot = self.ticks
 			self.left_right_shot = not self.left_right_shot
 
@@ -84,8 +84,6 @@ class Player():
 
 		self.MoveCamera(self.camera_target)
 
-		self.ticks += 1
-
 		self.collision = None
 
 	def screen_position(self,window,position=[]):
@@ -101,9 +99,9 @@ class Player():
 	def draw_projectiles(self,window):
 		for _type,projectiles in self.projectiles.items():
 			for projectile in projectiles:
-				projectile.MoveTick()
+				projectile.Move(self.ticks)
 
-				if not projectile.Alive():
+				if not projectile.Alive(self.ticks):
 					self.projectiles[_type].remove(projectile)
 				else:
 					projectile.draw(window,self)
@@ -133,5 +131,5 @@ class Player():
 				round(self.angle,2),
 				round(self.velocity,2),
 			],
-			"Projectiles": {key: [] for key,value in self.projectiles.items()}
+			"Projectiles": {_type: [entity.dump() for entity in entities] for _type,entities in self.projectiles.items()}
 		}

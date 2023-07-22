@@ -190,24 +190,25 @@ class Star():
 
 class Laser():
 	"""Laser Weapon Class"""
-	def __init__(self,position,rotation,size=1):
-		self.position = position
+	def __init__(self,tick,position,rotation,size=1):
+		self.start_position = position
+		self.position = self.start_position
 		self.rotation = rotation
 		self.size = size
 		self.draw_image = RotatedImage("assets\\draw_laser_1.png",[0,0,self.size*5,self.size*5])
 
-		self.velocity = 6
+		self.start_tick = tick
+
+		self.velocity = 10
 		self.lifetime = 200
-		self.ticks = 0
 
 		self.title = "Laser"
 
-	def Alive(self):
-		return self.ticks < self.lifetime
+	def Alive(self,tick):
+		return (tick - self.start_tick) < self.lifetime
 
-	def MoveTick(self):
-		self.position += AngleToPosition(90 - self.rotation,self.velocity)
-		self.ticks += 1
+	def Move(self,tick):
+		self.position = self.start_position + AngleToPosition(90 - self.rotation,self.velocity * (tick - self.start_tick))
 
 	def draw(self,window,player):
 		self.draw_image.x = window.get_width()/2 + self.position.x - player.camera.x
@@ -219,6 +220,14 @@ class Laser():
 		self.draw_image.rotation = 180 - self.rotation
 
 		self.draw_image.draw(window)
+
+	def dump(self):
+		return [
+			self.start_tick,
+			round(self.start_position.x,2),
+			round(self.start_position.y,2),
+			round(self.rotation,2),
+		]
 		
 class Mothership():
 	"""Main Player Base for Upgrades"""

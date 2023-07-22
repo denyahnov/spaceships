@@ -38,21 +38,41 @@ for asteroid in asteroids.items:
 
 other_players = {}
 
-while client.data == []:
+while client.data == {}:
 	network.sleep(network.TPS)
 
 while window.RUNNING and client.CONNECTED:
+	player.ticks = client.data["Tick"]
+	
 	for values in client.data["Players"]:
-		enemy, (x, y, angle, velocity) = values["Port"],values["Position"]
+		enemy, (x, y, angle, velocity), projectiles = values["Port"],values["Position"],values["Projectiles"]
 
-		if enemy not in other_players: 
-			other_players[enemy] = Spaceship(55)
+		if enemy not in other_players:
+			other_players[enemy] = {"Spaceship": Spaceship(55),"Projectiles":{"Laser": {}}} 
 
-		other_players[enemy].draw(
+		for _type,entities in projectiles:
+			if _type == "Laser":
+				for start_tick,x,y,angle in projectiles["Laser"]:
+					if str(start_tick) not in other_players[enemy]["Projectiles"]["Laser"]:
+						other_players[enemy]["Projectiles"]["Laser"][str(start_tick)].append(
+							Laser(start_tick,Vector2(x,y),angle)
+						)
+
+		other_players[enemy]["Spaceship"].draw(
 			window.screen,
 			player.screen_position(window.screen,[x,y]),
 			360 - angle, velocity
 		)
+
+		for _type,projectiles in other_players[enemy]["Projectiles"].items():
+			for projectile in projectiles:
+				projectile.Move(tick)
+
+				if not projectile.Alive(tick):
+					other_players[enemy]["Projectiles"][_type].pop(str(projectile.start_tick))
+				else:
+					projectile.draw(window.screen,player)
+		
 
 	ui.OPEN = not window.get_key(Globals.K_UNFOCUS)
 

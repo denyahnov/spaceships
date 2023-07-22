@@ -5,7 +5,7 @@ from time import sleep,time
 from threading import Thread
 from traceback import print_exc
 
-TPS = 1 / 60
+TPS = 1 / 100
 
 def Get_IP():
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

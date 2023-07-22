@@ -5,7 +5,7 @@ from threading import Thread
 from traceback import print_exc
 from multiprocessing.pool import ThreadPool
 
-TPS = 1 / 60
+TPS = 1 / 100
 
 def FindServers(search_range=10):
 	ip = Get_IP()
@@ -58,7 +58,7 @@ class Client():
 
 		self.player = player
 
-		self.data = []
+		self.data = {}
 
 	def Send(self,server):
 		server.send(json.dumps(self.player.dump()).encode("utf-8"))

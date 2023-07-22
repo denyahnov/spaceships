@@ -43,7 +43,9 @@ while client.data == []:
 
 while window.RUNNING and client.CONNECTED:
 	for player in client.data["Players"]:
-		for enemy, x, y, angle, velocity in player["Position"]:
+		for x, y, angle, velocity in player["Position"]:
+			enemy = player["Port"]
+			
 			if enemy not in other_players: 
 				other_players[enemy] = Spaceship(55)
 

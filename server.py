@@ -30,7 +30,7 @@ class Server():
 		self.players[address] = json.loads(self.clients[address].recv(1024).decode("utf-8"))
 
 	def Send(self,address):
-		data = [[port] + values for port,values in self.players.items() if port != address]
+		data = [{"Port": port} | values for port,values in self.players.items() if port != address]
 
 		self.clients[address].send(json.dumps({"Tick": self.ticks_alive, "Players": data}).encode('utf-8'))
 

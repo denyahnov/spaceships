@@ -42,18 +42,17 @@ while client.data == []:
 	network.sleep(network.TPS)
 
 while window.RUNNING and client.CONNECTED:
-	for player in client.data["Players"]:
-		for x, y, angle, velocity in player["Position"]:
-			enemy = player["Port"]
-			
-			if enemy not in other_players: 
-				other_players[enemy] = Spaceship(55)
+	for values in client.data["Players"]:
+		enemy, (x, y, angle, velocity) = values["Port"],values["Position"]
 
-			other_players[enemy].draw(
-				window.screen,
-				player.screen_position(window.screen,[x,y]),
-				360 - angle, velocity
-			)
+		if enemy not in other_players: 
+			other_players[enemy] = Spaceship(55)
+
+		other_players[enemy].draw(
+			window.screen,
+			player.screen_position(window.screen,[x,y]),
+			360 - angle, velocity
+		)
 
 	ui.OPEN = not window.get_key(Globals.K_UNFOCUS)
 

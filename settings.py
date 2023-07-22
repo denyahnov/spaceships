@@ -4,6 +4,7 @@ global SETTINGS
 
 SETTINGS = {
 	"szAccountName": "Player",
+	"bShowFps": True,
 }
 
 def Load():
@@ -28,3 +29,8 @@ def Get(key):
 		return SETTINGS[key]
 	except KeyError:
 		return None
+
+def Set(key,value):
+	global SETTINGS
+
+	SETTINGS[key] = value

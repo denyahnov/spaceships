@@ -71,8 +71,6 @@ class Client():
 			while self.CONNECTED:
 				self.data = self.Receive(server)
 
-				print(self.data)
-
 				self.Send(server)
 
 				sleep(TPS)

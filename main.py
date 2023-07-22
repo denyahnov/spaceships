@@ -10,6 +10,7 @@ import network
 import settings
 
 settings.Load()
+ui.settings = settings
 
 player = Player(settings.Get("szAccountName"),window.H_WIDTH,window.H_HEIGHT)
 arrow = Arrow()
@@ -90,6 +91,9 @@ while window.RUNNING and client.CONNECTED:
 	if player.focused: 
 		arrow.draw(window,player)
 
-	window.draw(Text("%s FPS" % int(window.clock.get_fps()),[10, window.HEIGHT - 30],font_size=20,color=(255,255,255)))
+	if settings.Get("bShowFps"):
+		window.draw(Text("%s FPS" % int(window.clock.get_fps()),[10, window.HEIGHT - 30],font_size=20,color=(255,255,255)))
 
 	window.update()
+
+settings.Save()

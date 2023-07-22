@@ -126,9 +126,12 @@ class Player():
 		self.mothership.draw(window,self)
 
 	def dump(self):
-		return [
-			round(self.position.x,2),
-			round(self.position.y,2),
-			round(self.angle,2),
-			round(self.velocity,2),
-		]
+		return {
+			"Position":[
+				round(self.position.x,2),
+				round(self.position.y,2),
+				round(self.angle,2),
+				round(self.velocity,2),
+			],
+			"Projectiles": {key: [] for key,value in self.projectiles.items()}
+		}

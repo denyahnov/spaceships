@@ -33,13 +33,12 @@ def CheckServer(host):
 				return {
 					"Response": 1,
 					"Address": HOST,
-					"Seed": int(data.split(":")[1]),
-					"Ticks": int(data.split(":")[2]),
+					"WorldSeed": int(data.split(":")[1]),
+					"WorldSize": int(data.split(":")[2]),
+					"WorldTicks": int(data.split(":")[3]),
 				}
 
-	except ConnectionRefusedError:
-		pass
-	except TimeoutError:
+	except (ConnectionRefusedError, TimeoutError, socket.timeout):
 		pass
 	except:
 		print_exc()

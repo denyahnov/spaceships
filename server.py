@@ -1,11 +1,11 @@
 import json
 import socket
 import random
-from time import sleep
+from time import sleep,time
 from threading import Thread
 from traceback import print_exc
 
-TPS = 1 / 20
+TPS = 1 / 60
 
 def Get_IP():
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -13,13 +13,14 @@ def Get_IP():
 	return s.getsockname()[0]
 
 class Server():
-	def __init__(self, seed = random.randint(100000000,999999999)):
+	def __init__(self, seed = random.randint(100000000,999999999), map_size = 5000):
 		self.RUNNING = False
 
 		self.clients = {}
 		self.players = {}
 
 		self.seed = seed
+		self.map_size = map_size
 
 		self.ticks_alive = 0
 
@@ -38,11 +39,11 @@ class Server():
 			data = conn.recv(1024).decode('utf-8').lower()
 
 			if data == "get":
-				conn.send(f"valid:{self.seed}:{self.ticks_alive}".encode("utf-8"))
+				conn.send(f"valid:{self.seed}:{self.map_size}:{self.ticks_alive}".encode("utf-8"))
 				conn.close()
 
 			elif data == "join":
-				print(f"Client Connected -> {addr[0]}:{addr[1]}")
+				print(f"[{self.ticks_alive}] Client Connected -> {addr[1]}")
 
 				self.clients[str(addr[1])] = conn
 
@@ -56,16 +57,18 @@ class Server():
 	def HandleClient(self,address):
 		try:
 			while self.RUNNING:
+				a = time()
+
 				self.Send(address)
 			
 				self.Receive(address)
 
-				sleep(TPS)
+				sleep(max(0,TPS - (time() - a)))
 
 			return 1
 
 		except ConnectionResetError:
-			print("Client Disconnected")
+			print(f"[{self.ticks_alive}] Client Disconnected -> {address}")
 
 			self.clients.pop(address)
 			self.players.pop(address)
@@ -103,6 +106,8 @@ class Server():
 				print("Server opened -> {}:{}".format(HOST,PORT))
 
 				accept_thread = Thread(target = self.AcceptClients, args = [s])
+
+				accept_thread.daemon = True
 
 				accept_thread.start()
 

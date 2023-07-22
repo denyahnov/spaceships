@@ -3,8 +3,6 @@ import GameMaker as gm
 from player import *
 from currency import *
 
-MAP_SIZE = 5000
-
 window = gm.Window([1920,1080],"Spaceships",background_color=(10,10,10),fullscreen=True,fps=70)
 
 import ui
@@ -26,15 +24,17 @@ chosen_server = servers[0]
 client = network.Client(player)
 client.Connect(chosen_server["Address"],65432)
 
-random.seed(chosen_server["Seed"])
+random.seed(chosen_server["WorldSeed"])
 
-stars = GenerateStars(int(MAP_SIZE * 1.5),MAP_SIZE)
-asteroids = GenerateAsteroids(int(MAP_SIZE * 0.25),MAP_SIZE)
+ui.world_info.update(f"Map Size: {chosen_server['WorldSize']}\nMap Seed: {chosen_server['WorldSeed']}")
+
+stars = GenerateStars(int(chosen_server["WorldSize"] * 1.5),chosen_server["WorldSize"])
+asteroids = GenerateAsteroids(int(chosen_server["WorldSize"] * 0.2),chosen_server["WorldSize"])
 
 for asteroid in asteroids.items:
-	asteroid.draw_image.rotation += asteroid.rotation_speed * chosen_server["Ticks"]
+	asteroid.draw_image.rotation += asteroid.rotation_speed * chosen_server["WorldTicks"]
 
-	asteroid.position += AngleToPosition(90 - asteroid.angle, asteroid.velocity * chosen_server["Ticks"])
+	asteroid.position += AngleToPosition(90 - asteroid.angle, asteroid.velocity * chosen_server["WorldTicks"])
 
 other_players = {}
 

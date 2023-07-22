@@ -1,8 +1,8 @@
 from currency import *
 
 class LinkedButton():
-	def __init__(self,text,image,parent,offset,size,hover_scaling=1.3,clicked_scaling=1.1):
-		self.text = Text(text,[0,0],color=[255] * 3,center=[gm.CENTER, gm.CENTER])
+	def __init__(self,text,image,parent,offset,size,hover_scaling=1.1,clicked_scaling=1.05):
+		self.text = Text(text,[0,0],color=(96,134,156),center=[gm.CENTER, gm.CENTER])
 		self.size = [0,0] + size
 		self.image = RotatedImage(image,self.size)
 		self.parent = parent
@@ -59,6 +59,7 @@ class Checkbox():
 	def __init__(self,position):
 		self.position = position
 		self.background = RotatedImage("assets\\icon_ui_square.png",self.position)
+		self.check = RotatedImage("assets\\icon_ui_check.png",self.position)
 
 
 titanium 	= Titanium(0,0)
@@ -71,6 +72,11 @@ inventory = Currency("",RotatedImage("assets\\icon_ui_background.png",[-500,160,
 play_button = LinkedButton("Continue", "assets\\icon_ui_button.png",inventory.icon,[138,110],[220,60])
 settings_button = LinkedButton("Settings", "assets\\icon_ui_button.png",inventory.icon,[138,190],[220,60])
 exit_button = LinkedButton("Exit", "assets\\icon_ui_button.png",inventory.icon,[138,270],[220,60])
+
+account_button_1 = LinkedButton("", "assets\\icon_ui_square.png",inventory.icon,[55,95],[64,64])
+account_button_2 = LinkedButton("", "assets\\icon_ui_account.png",inventory.icon,[55,95],[64,64])
+
+world_info = Text("Map Size: \nMap Seed: ",[0,0],font_size=10,color=(220,220,220))
 
 global OPEN
 global FOCUSED
@@ -94,6 +100,11 @@ def Animate():
 	play_button.update()
 	settings_button.update()
 	exit_button.update()
+	account_button_1.update()
+	account_button_2.update()
+
+	world_info.x = inventory.icon.x + 90
+	world_info.y = inventory.icon.y + 330
 
 def DrawUI(window):
 	global FOCUSED
@@ -106,6 +117,13 @@ def DrawUI(window):
 	if exit_button.status in [gm.PRESSED, gm.HELD]:
 		window.RUNNING = False
 
-	window.draw([inventory.icon] + play_button.draw() + settings_button.draw() + exit_button.draw(),gm.GUI)
+	window.draw(
+		[inventory.icon,world_info] + 
+		play_button.draw() + 
+		settings_button.draw() + 
+		exit_button.draw() + 
+		account_button_1.draw() +
+		account_button_2.draw(),
+	gm.GUI)
 
 	window.draw([titanium,gear,plasma,magnesium],gm.GUI)

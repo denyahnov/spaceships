@@ -38,16 +38,20 @@ for asteroid in asteroids.items:
 
 other_players = {}
 
-while window.RUNNING and client.CONNECTED:
-	for enemy, x, y, angle, velocity in client.data["Players"]:
-		if enemy not in other_players: 
-			other_players[enemy] = Spaceship(55)
+while client.data == []:
+	network.sleep(network.TPS)
 
-		other_players[enemy].draw(
-			window.screen,
-			player.screen_position(window.screen,[x,y]),
-			360 - angle, velocity
-		)
+while window.RUNNING and client.CONNECTED:
+	for player in client.data["Players"]:
+		for enemy, x, y, angle, velocity in player["Position"]:
+			if enemy not in other_players: 
+				other_players[enemy] = Spaceship(55)
+
+			other_players[enemy].draw(
+				window.screen,
+				player.screen_position(window.screen,[x,y]),
+				360 - angle, velocity
+			)
 
 	ui.OPEN = not window.get_key(Globals.K_UNFOCUS)
 

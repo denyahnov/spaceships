@@ -7,7 +7,7 @@ import timeit
 from GameMaker.Physics import Movement2D
 
 class Player():
-	def __init__(self,username,x,y,camera = Vector3(0,0,0)):
+	def __init__(self,username,spawnpoint=[0,0],camera = Vector3(0,0,0)):
 		self.size = 55
 		self.health = 100
 
@@ -16,11 +16,12 @@ class Player():
 
 		self.focused = True
 		self.username = username
+		self.spawnpoint = spawnpoint
 
 		self.spaceship = Spaceship(self.size)
-		self.mothership = Mothership(self.username if len(self.username) < 16 else self.username[:13] + "...",Vector2(0,0),90)
+		self.mothership = Mothership(self.username if len(self.username) < 16 else self.username[:13] + "...",Vector2(self.spawnpoint[0],self.spawnpoint[1]),90)
 
-		self.position = Vector2(0,0)
+		self.position = Vector2(self.spawnpoint[0],self.spawnpoint[1])
 
 		self.camera_target = self.position
 
@@ -41,6 +42,16 @@ class Player():
 		self.left_right_shot = False
 
 		self.collision = None
+
+	def setSpawnpoint(self,position,change_pos=False):
+		self.spawnpoint = position
+
+		if change_pos:
+			self.position.x, self.position.y = self.spawnpoint
+			self.mothership.position.x, self.mothership.position.y = self.spawnpoint
+			self.camera.x, self.camera.z = self.spawnpoint
+
+			self.mothership.updateCenter()
 
 	def Shoot(self,true=True):
 		if true and self.ticks > self.last_shoot + self.shoot_cooldown:
@@ -76,12 +87,13 @@ class Player():
 
 		self.position += AngleToPosition(90 - self.angle,self.velocity)
 
-		if window.get_key(Globals.K_UNFOCUS) and not ui_focused: 
-			self.camera_target = self.mothership.center
-			self.focused = False
-		else:
-			self.camera_target = self.position
-			self.focused = True
+		if not ui_focused:
+			if window.get_key(Globals.K_UNFOCUS): 
+				self.camera_target = self.mothership.center
+				self.focused = False
+			else:
+				self.camera_target = self.position
+				self.focused = True
 
 		self.MoveCamera(self.camera_target)
 
@@ -126,6 +138,7 @@ class Player():
 
 	def dump(self):
 		return {
+			"Username": self.username,
 			"Position":[
 				round(self.position.x,2),
 				round(self.position.y,2),

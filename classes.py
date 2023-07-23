@@ -71,10 +71,14 @@ class AssetList():
 
 class Spaceship():
 	"""docstring for Spaceship"""
-	def __init__(self,size):
+	def __init__(self,size,friendly=True):
 		self.attachments = []
 
-		self.body = RotatedImage("assets\\draw_spaceship_body.png",[0,0,size,size])
+		if friendly:
+			self.body = RotatedImage("assets\\draw_spaceship_body.png",[0,0,size,size])
+		else:
+			self.body = RotatedImage("assets\\draw_spaceship_enemy.png",[0,0,size,size])
+
 		self.fire = RotatedImage("assets\\draw_spaceship_fire.png",[0,0,size,size])
 
 	def draw(self,window,rect,angle,speed):
@@ -199,8 +203,8 @@ class Laser():
 
 		self.start_tick = tick
 
-		self.velocity = 8
-		self.lifetime = 200
+		self.velocity = 7
+		self.lifetime = 150
 
 		self.title = "Laser"
 
@@ -231,11 +235,14 @@ class Laser():
 		
 class Mothership():
 	"""Main Player Base for Upgrades"""
-	def __init__(self,title,position,rotation=0):
+	def __init__(self,title,position,rotation=0,friendly=True):
 		self.position = position
 		self.rotation = rotation
 
-		self.draw_image = RotatedImage("assets\\draw_mothership_body.png",[0,0,400,450])
+		if friendly:
+			self.draw_image = RotatedImage("assets\\draw_mothership_body.png",[0,0,400,450])
+		else:
+			self.draw_image = RotatedImage("assets\\draw_mothership_enemy.png",[0,0,400,450])
 
 		self.center = Vector2(self.position.x + self.draw_image.w/2, self.position.y - self.draw_image.h/2)
 
@@ -244,6 +251,9 @@ class Mothership():
 
 		self.health = 100
 		self.healthbar = ProgressBar([0,0,200,12])
+
+	def updateCenter(self):
+		self.center = Vector2(self.position.x + self.draw_image.w/2, self.position.y - self.draw_image.h/2)
 
 	def draw(self,window,player):
 		self.draw_image.x = window.get_width()/2 + self.position.x - player.camera.x

@@ -5,6 +5,7 @@ global SETTINGS
 SETTINGS = {
 	"szAccountName": "Player",
 	"bShowFps": True,
+	"bShowCoords": False,
 }
 
 def Load():

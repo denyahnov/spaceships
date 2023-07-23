@@ -73,6 +73,8 @@ class Checkbox():
 		return [self.background, self.text] + ([self.check] if settings.Get(self.variable) else [])
 
 	def update(self):
+		global SETTINGS
+
 		self.check.x = self.parent.x + self.position[0]
 		self.check.y = self.parent.y + self.position[1]
 
@@ -87,7 +89,7 @@ class Checkbox():
 
 		self.status = gm.HELD if w and h and click and self.status in [gm.PRESSED,gm.HELD] else gm.PRESSED if w and h and click else gm.RELEASED if not click and self.status in [gm.PRESSED,gm.HELD] else gm.HOVERED if w and h else gm.NONE
 
-		if self.status == gm.RELEASED:
+		if self.status == gm.RELEASED and SETTINGS:
 			settings.Set(self.variable, not settings.Get(self.variable))
 
 global settings
@@ -107,21 +109,35 @@ exit_button = LinkedButton("Exit", "assets\\icon_ui_button.png",inventory.icon,[
 account_button_1 = LinkedButton("", "assets\\icon_ui_square.png",inventory.icon,[55,95],[64,64])
 account_button_2 = LinkedButton("", "assets\\icon_ui_account.png",inventory.icon,[55,95],[64,64])
 
-world_info = Text("Map Size: \nMap Seed: ",[0,0],font_size=10,color=(220,220,220))
+world_info = Text("Map Size: \nMap Seed: ",[0,0],font_size=10,color=(220,220,220),center=[gm.TOP,gm.LEFT])
 
 settings_exit1 = LinkedButton("", "assets\\icon_ui_square.png",inventory.icon,[390,95],[48,48])
 settings_exit2 = LinkedButton("", "assets\\icon_ui_cross.png", inventory.icon,[390,95],[48,48])
 
-settings_fps = Checkbox("bShowFps","Show FPS Counter",inventory.icon,[100,110])
+checkboxes = [
+	Checkbox("bShowFps","Show FPS Counter",	inventory.icon,	[100,110]),
+]
+
+username_text = Text("Account Username:",[0,0],font_size=16,color=(96,134,156))
+username_input = Textbox([0,0,280,36],max_length=20,background_color=(96,134,156),text_color=(96,134,156),foreground_color=(157,190,209))
+username_save = LinkedButton("Save", "assets\\icon_ui_button.png",inventory.icon,[168,190],[160,40])
 
 global OPEN
 global FOCUSED
+global ACCOUNT
 
 OPEN = True
 FOCUSED = False
 SETTINGS = False
+ACCOUNT = False
 
-ALPHA = 160,20
+def Init(s):
+	global settings
+
+	settings = s
+
+	username_input.text = settings.Get("szAccountName")
+	username_input.draw_text.update(username_input.text)
 
 def Animate():
 	global OPEN
@@ -143,52 +159,75 @@ def Animate():
 	settings_exit1.update()
 	settings_exit2.update()
 
-	settings_fps.update()
+	username_save.update()
 
-	world_info.x = inventory.icon.x + 90
+	[c.update() for c in checkboxes]
+
+	world_info.x = inventory.icon.x + 60
 	world_info.y = inventory.icon.y + 330
+
+	username_text.x = inventory.icon.x + 100
+	username_text.y = inventory.icon.y + 120
+
+	username_input.x = inventory.icon.x + 100
+	username_input.y = inventory.icon.y + 140
 
 def DrawUI(window):
 	global FOCUSED
 	global SETTINGS
+	global ACCOUNT
+
+	global settings
 
 	Animate()
 
 	if not FOCUSED:
 		SETTINGS = False
+		ACCOUNT = False
 
-	if disconnect_button.status == gm.RELEASED:
+	if not SETTINGS and not ACCOUNT and disconnect_button.status == gm.RELEASED:
 		pass
 
-	if settings_button.status == gm.RELEASED:
+	if not SETTINGS and not ACCOUNT and settings_button.status == gm.RELEASED:
 		SETTINGS = True
 
-	if exit_button.status == gm.RELEASED:
+	if not SETTINGS and not ACCOUNT and exit_button.status == gm.RELEASED:
 		window.RUNNING = False
+
+	if not SETTINGS and not ACCOUNT and account_button_1.status == gm.RELEASED:
+		ACCOUNT = True
+
+		username_input.text = settings.Get("szAccountName")
+		username_input.draw_text.update(username_input.text)
 
 	if settings_exit1.status == gm.RELEASED:
 		if SETTINGS:
 			SETTINGS = False
+		elif ACCOUNT:
+			ACCOUNT = False
 		elif FOCUSED:
 			FOCUSED = False
 
-	if settings_fps == gm.RELEASED:
-		pass
+	if ACCOUNT:
+		username_input.update(window)
+
+		if username_save.status == gm.RELEASED:
+			settings.Set("szAccountName", username_input.text)
 
 	window.draw([inventory.icon,world_info] + settings_exit1.draw() + settings_exit2.draw(), gm.GUI)
 
-	if not SETTINGS:
+	if SETTINGS:
+		for c in checkboxes:
+			window.draw(c.draw(),gm.GUI)
+	elif ACCOUNT:
+		window.draw([username_text,username_input] + username_save.draw(),gm.GUI)
+	else:
 		window.draw(
 			disconnect_button.draw() + 
 			settings_button.draw() + 
 			exit_button.draw() + 
 			account_button_1.draw() + 
 			account_button_2.draw(),
-			gm.GUI
-		)
-	else:
-		window.draw(
-			settings_fps.draw(),
 			gm.GUI
 		)
 

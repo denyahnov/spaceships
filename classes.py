@@ -199,7 +199,7 @@ class Laser():
 
 		self.start_tick = tick
 
-		self.velocity = 10
+		self.velocity = 8
 		self.lifetime = 200
 
 		self.title = "Laser"

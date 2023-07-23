@@ -69,13 +69,14 @@ class Player():
 
 		self.velocity = self.Movement.tick()
 
-		self.Shoot(window.get_key(Globals.K_SHOOT))
+		if not ui_focused:
+			self.Shoot(window.get_key(Globals.K_SHOOT))
 
 		self.angle += self.Rotation.tick()
 
 		self.position += AngleToPosition(90 - self.angle,self.velocity)
 
-		if window.get_key(Globals.K_UNFOCUS): 
+		if window.get_key(Globals.K_UNFOCUS) and not ui_focused: 
 			self.camera_target = self.mothership.center
 			self.focused = False
 		else:

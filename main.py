@@ -10,7 +10,8 @@ import network
 import settings
 
 settings.Load()
-ui.settings = settings
+
+ui.Init(settings)
 
 player = Player(settings.Get("szAccountName"),window.H_WIDTH,window.H_HEIGHT)
 arrow = Arrow()

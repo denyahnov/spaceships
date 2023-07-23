@@ -1,4 +1,5 @@
 import json
+import math
 import socket
 import random
 from time import sleep,time
@@ -12,12 +13,16 @@ def Get_IP():
 	s.connect(("8.8.8.8", 80))
 	return s.getsockname()[0]
 
+def Distance(point1,point2):
+	return math.sqrt( pow(point2[0]-point1[0],2) + pow(point2[1]-point1[1],2) )
+
 class Server():
 	def __init__(self, seed = random.randint(100000000,999999999), map_size = 5000):
 		self.RUNNING = False
 
 		self.clients = {}
 		self.players = {}
+		self.locations = {}
 
 		self.seed = seed
 		self.map_size = map_size
@@ -30,9 +35,9 @@ class Server():
 		self.players[address] = json.loads(self.clients[address].recv(1024).decode("utf-8"))
 
 	def Send(self,address):
-		data = [{"Port": port} | values for port,values in self.players.items() if port != address]
+		data = [{"Port": port, "Spawnpoint": self.locations[port]} | values for port,values in self.players.items() if port != address]
 
-		self.clients[address].send(json.dumps({"Tick": self.ticks_alive, "Players": data}).encode('utf-8'))
+		self.clients[address].send(json.dumps({"Tick": self.ticks_alive, "Players": data, "Spawnpoint": self.locations[address]}).encode('utf-8'))
 
 	def CheckClient(self,conn,addr):
 		try:
@@ -47,12 +52,31 @@ class Server():
 
 				self.clients[str(addr[1])] = conn
 
+				self.CreatePlayer(str(addr[1]))
+
 				self.HandleClient(str(addr[1]))
 
 		except OSError:
 			pass
 		except:
 			print_exc()
+
+	def CreatePlayer(self,address):
+		border = int(self.map_size * 0.8)
+
+		while True:
+			position = [random.randint(-border,border),random.randint(-border,border)]
+
+			cont = True
+
+			for player,location in self.locations.items():
+				if Distance(position,location) < 100:
+					cont = False
+					break
+
+			if cont: break
+
+		self.locations[address] = position
 
 	def HandleClient(self,address):
 		try:
@@ -72,6 +96,7 @@ class Server():
 
 			self.clients.pop(address)
 			self.players.pop(address)
+			self.locations.pop(address)
 
 			return 1
 		
@@ -80,6 +105,7 @@ class Server():
 
 			self.clients.pop(address)
 			self.players.pop(address)
+			self.locations.pop(address)
 
 			return 0
 

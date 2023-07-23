@@ -1,4 +1,5 @@
 {
-    "szAccountName": "Test Username",
-    "bShowFps": true
+    "szAccountName": "Player",
+    "bShowFps": true,
+    "bShowCoords": true
 }

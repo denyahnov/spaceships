@@ -13,7 +13,7 @@ settings.Load()
 
 ui.Init(settings)
 
-player = Player(settings.Get("szAccountName"),window.H_WIDTH,window.H_HEIGHT)
+player = Player(settings.Get("szAccountName"))
 arrow = Arrow()
 
 servers = network.FindServers()
@@ -43,6 +43,10 @@ other_players = {}
 while client.data == {}:
 	network.sleep(network.TPS)
 
+player.setSpawnpoint(client.data["Spawnpoint"],True)
+
+print("Spawned at",player.position)
+
 while window.RUNNING and client.CONNECTED:
 	player.ticks = client.data["Tick"]
 
@@ -50,7 +54,11 @@ while window.RUNNING and client.CONNECTED:
 		enemy, (x, y, angle, velocity), projectiles = values["Port"],values["Position"],values["Projectiles"]
 
 		if enemy not in other_players:
-			other_players[enemy] = {"Spaceship": Spaceship(55),"Projectiles":{"Laser": {}}} 
+			other_players[enemy] = {
+				"Spaceship": Spaceship(55,False),
+				"Mothership": Mothership(values["Username"],Vector2(*values["Spawnpoint"]),90,False),
+				"Projectiles":{"Laser": {}}
+			} 
 
 		for _type,entities in projectiles.items():
 			if _type == "Laser":
@@ -62,6 +70,11 @@ while window.RUNNING and client.CONNECTED:
 			window.screen,
 			player.screen_position(window.screen,[x,y]),
 			360 - angle, velocity
+		)
+
+		other_players[enemy]["Mothership"].draw(
+			window.screen,
+			player,
 		)
 
 		for _type,projectiles in other_players[enemy]["Projectiles"].items():
@@ -94,6 +107,9 @@ while window.RUNNING and client.CONNECTED:
 
 	if settings.Get("bShowFps"):
 		window.draw(Text("%s FPS" % int(window.clock.get_fps()),[10, window.HEIGHT - 30],font_size=20,color=(255,255,255)))
+
+	if settings.Get("bShowCoords"):
+		window.draw(Text(player.position.rounded(1),[window.WIDTH - 10, window.HEIGHT - 10],font_size=20,color=(255,255,255),center=[gm.BOTTOM,gm.RIGHT]))
 
 	window.update()
 

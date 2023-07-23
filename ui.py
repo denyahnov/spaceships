@@ -116,6 +116,7 @@ settings_exit2 = LinkedButton("", "assets\\icon_ui_cross.png", inventory.icon,[3
 
 checkboxes = [
 	Checkbox("bShowFps","Show FPS Counter",	inventory.icon,	[100,110]),
+	Checkbox("bShowCoords","Show Player Position",	inventory.icon,	[100,150]),
 ]
 
 username_text = Text("Account Username:",[0,0],font_size=16,color=(96,134,156))

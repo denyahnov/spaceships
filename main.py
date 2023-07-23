@@ -1,5 +1,9 @@
 import GameMaker as gm
 
+import download
+
+download.GetAssets()
+
 from player import *
 from currency import *
 
@@ -44,8 +48,6 @@ while client.data == {}:
 	network.sleep(network.TPS)
 
 player.setSpawnpoint(client.data["Spawnpoint"],True)
-
-print("Spawned at",player.position)
 
 while window.RUNNING and client.CONNECTED:
 	player.ticks = client.data["Tick"]

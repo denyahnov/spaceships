@@ -67,14 +67,11 @@ class Server():
 		while True:
 			position = [random.randint(-border,border),random.randint(-border,border)]
 
-			cont = True
-
 			for player,location in self.locations.items():
-				if Distance(position,location) < 100:
-					cont = False
+				if Distance(position,location) < 500:
 					break
-
-			if cont: break
+			else:
+				break
 
 		self.locations[address] = position
 

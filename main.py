@@ -22,7 +22,9 @@ arrow = Arrow()
 
 servers = network.FindServers()
 
-if len(servers) == 0: 
+if len(servers) == 0:
+	from sys import exit
+	 
 	exit("Network -> No Available Servers")
 
 chosen_server = servers[0]

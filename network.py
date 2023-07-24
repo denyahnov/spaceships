@@ -9,11 +9,11 @@ TPS = 1 / 100
 
 def FindServers(search_range=10):
 	ip = Get_IP()
-	base,end = ip.split('.')[:-1], int(ip.split('.')[-1])
+	base,middle,end = ip.split('.')[:-2], int(ip.split('.')[-2]), int(ip.split('.')[-1])
 
-	possiblities = [".".join(base + [str(abs(end + i))]) for i in range(-search_range, search_range)]
+	possiblities = [".".join(base + [str(abs(middle + x))] + [str(abs(end + i))]) for i in range(-search_range, search_range) for x in range(-search_range,search_range)]
 	
-	with ThreadPool(processes = 25) as pool:
+	with ThreadPool(processes = 50) as pool:
 		return [result for result in pool.map(CheckServer,possiblities) if result["Response"]]
 
 def CheckServer(host):

@@ -19,7 +19,7 @@ class Player():
 		self.spawnpoint = spawnpoint
 
 		self.spaceship = Spaceship(self.size)
-		self.mothership = Mothership(self.username if len(self.username) < 16 else self.username[:13] + "...",Vector2(self.spawnpoint[0],self.spawnpoint[1]),90)
+		self.mothership = Mothership(self.username,Vector2(self.spawnpoint[0],self.spawnpoint[1]),90)
 
 		self.position = Vector2(self.spawnpoint[0],self.spawnpoint[1])
 
@@ -42,6 +42,11 @@ class Player():
 		self.left_right_shot = False
 
 		self.collision = None
+
+	def setUsername(self,text):
+		self.username = text
+		self.mothership.title = text
+		self.mothership.text.update(text)
 
 	def setSpawnpoint(self,position,change_pos=False):
 		self.spawnpoint = position

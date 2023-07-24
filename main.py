@@ -9,7 +9,12 @@ download.GetAssets()
 from player import *
 from currency import *
 
+log = ["Loading Assets..."]
+
 window = gm.Window([1920,1080],"Spaceships",background_color=(10,10,10),fullscreen=True,fps=70)
+
+window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))
+window.update()
 
 import ui
 import network
@@ -22,17 +27,35 @@ ui.Init(settings)
 player = Player(settings.Get("szAccountName"))
 arrow = Arrow()
 
+log.append("Loaded!")
+log.append("Finding Server...")
+
+window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))
+window.update()
+
 servers = network.FindServers()
 
-if len(servers) == 0:
+if servers == None or len(servers) == 0:
 	from sys import exit
 	 
 	exit("Network -> No Available Servers")
 
+log.append("Server Found!")
+log.append("Connecting...")
+
 chosen_server = servers[0]
+
+window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))
+window.update()
 
 client = network.Client(player)
 client.Connect(chosen_server["Address"],65432)
+
+log.append("Connected!")
+log.append("Creating World...")
+
+window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))
+window.update()
 
 random.seed(chosen_server["WorldSeed"])
 
@@ -99,7 +122,7 @@ while window.RUNNING and client.CONNECTED:
 
 	if Globals.K_GUI in window.keys_up: ui.FOCUSED = not ui.FOCUSED
 
-	ui.DrawUI(window)
+	ui.DrawUI(window,player)
 
 	stars.draw(window.screen,player,client.data["Tick"])
 	asteroids.draw(window.screen,player,client.data["Tick"])

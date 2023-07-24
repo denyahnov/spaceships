@@ -173,7 +173,7 @@ def Animate():
 	username_input.x = inventory.icon.x + 100
 	username_input.y = inventory.icon.y + 140
 
-def DrawUI(window):
+def DrawUI(window,player):
 	global FOCUSED
 	global SETTINGS
 	global ACCOUNT
@@ -213,6 +213,7 @@ def DrawUI(window):
 		username_input.update(window)
 
 		if username_save.status == gm.RELEASED:
+			player.setUsername(username_input.text)
 			settings.Set("szAccountName", username_input.text)
 
 	window.draw([inventory.icon,world_info] + settings_exit1.draw() + settings_exit2.draw(), gm.GUI)

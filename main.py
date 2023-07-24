@@ -1,5 +1,7 @@
 import GameMaker as gm
 
+# pyinstaller --noconfirm --onefile --windowed --icon "C:/Users/denya/OneDrive/Desktop/GitHub/spaceships/app_icon.ico" --name "Spaceships"  "C:/Users/denya/OneDrive/Desktop/GitHub/spaceships/main.py"
+
 import download
 
 download.GetAssets()

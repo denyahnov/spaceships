@@ -7,14 +7,27 @@ from multiprocessing.pool import ThreadPool
 
 TPS = 1 / 100
 
-def FindServers(search_range=10):
+def FindServers(first=10, second=100):
 	ip = Get_IP()
 	base,middle,end = ip.split('.')[:-2], int(ip.split('.')[-2]), int(ip.split('.')[-1])
 
-	possiblities = [".".join(base + [str(abs(middle + x))] + [str(abs(end + i))]) for i in range(-search_range, search_range) for x in range(-search_range,search_range)]
+	possiblities = [".".join(base + [str(abs(middle + x))] + [str(abs(end + i))]) for x in range(-first,first) for i in range(-second, second) if middle + x > 0 and end + i > 0]
 	
-	with ThreadPool(processes = 50) as pool:
-		return [result for result in pool.map(CheckServer,possiblities) if result["Response"]]
+	threads = second * 2
+
+	split_up = [possiblities[i * threads : i * threads + threads] for i in range(len(possiblities) // threads)]
+
+	print(split_up)
+
+	for s in split_up:
+		with ThreadPool(processes = threads) as pool:
+			a = [result for result in pool.map(CheckServer,s) if result["Response"]]
+
+			print(a)
+
+			if a == None: continue
+
+			if len(a) > 0: return a
 
 def CheckServer(host):
 	HOST, PORT = host, 65432

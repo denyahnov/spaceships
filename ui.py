@@ -125,12 +125,15 @@ username_save = LinkedButton("Save", "assets\\icon_ui_button.png",inventory.icon
 
 server_input = Textbox([0,0,250,80],max_length=6,background_color=(96,134,156),text_color=(96,134,156),foreground_color=(157,190,209),only_in="1234567890")
 
+code_text = Text("Enter Code",[server_input.x + 10,server_input.y + 10],color=(96,134,156),center=[gm.CENTER,gm.CENTER])
+
 server_ready1 = LinkedButton("", "assets\\icon_ui_square.png",server_input,[server_input.w + 10,0],[server_input.h,server_input.h])
 server_ready2 = LinkedButton("", "assets\\icon_ui_check.png", server_input,[server_input.w + 10,0],[server_input.h,server_input.h])
 
 autojoin_button = LinkedButton("Autojoin", "assets\\icon_ui_button.png",server_input,[0,100],[320,80])
+exit_menu = LinkedButton("Exit", "assets\\icon_ui_button.png",server_input,[60,330],[200,80])
 
-title_screen = RotatedImage("assets\\icon_title.png",[0,0,257,38])
+title_screen = RotatedImage("assets\\icon_title.png",[0,0,800,120])
 
 global OPEN
 global FOCUSED
@@ -164,8 +167,11 @@ def Init(s):
 	username_input.draw_text.update(username_input.text)
 
 def MainMenu(window):
-	server_input.x = window.H_WIDTH - 150
-	server_input.y = 200
+	server_input.x = window.H_WIDTH - 160
+	server_input.y = 250
+
+	code_text.x = server_input.x + server_input.w/2
+	code_text.y = server_input.y + server_input.h/2
 
 	title_screen.x = window.H_WIDTH - title_screen.w/2
 	title_screen.y = 50
@@ -176,9 +182,17 @@ def MainMenu(window):
 	server_ready2.update()
 
 	autojoin_button.update()
+	exit_menu.update()
 
-	window.draw([title_screen,server_input] + server_ready1.draw() + server_ready2.draw() + autojoin_button.draw(),gm.GUI)
+	window.draw([title_screen,server_input] + server_ready1.draw() + server_ready2.draw() + autojoin_button.draw() + exit_menu.draw(),gm.GUI)
+
+	if len(server_input.text) == 0:
+		window.draw(code_text,gm.GUI)
+
 	window.update()
+
+	if exit_menu.status == gm.PRESSED:
+		window.RUNNING = False
 
 	if autojoin_button.status == gm.RELEASED:
 		return 1

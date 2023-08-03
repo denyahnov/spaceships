@@ -7,6 +7,9 @@ from multiprocessing.pool import ThreadPool
 
 TPS = 1 / 100
 
+def CodetoIP(code):
+	return ".".join(Get_IP().split(".")[:-2] + [str(int(code[0:3])), str(int(code[3:]))])
+
 def FindServers(first=10, second=100):
 	ip = Get_IP()
 	base,middle,end = ip.split('.')[:-2], int(ip.split('.')[-2]), int(ip.split('.')[-1])

@@ -123,6 +123,15 @@ username_text = Text("Account Username:",[0,0],font_size=16,color=(96,134,156))
 username_input = Textbox([0,0,280,36],max_length=20,background_color=(96,134,156),text_color=(96,134,156),foreground_color=(157,190,209))
 username_save = LinkedButton("Save", "assets\\icon_ui_button.png",inventory.icon,[168,190],[160,40])
 
+server_input = Textbox([0,0,250,80],max_length=6,background_color=(96,134,156),text_color=(96,134,156),foreground_color=(157,190,209),only_in="1234567890")
+
+server_ready1 = LinkedButton("", "assets\\icon_ui_square.png",server_input,[server_input.w + 10,0],[server_input.h,server_input.h])
+server_ready2 = LinkedButton("", "assets\\icon_ui_check.png", server_input,[server_input.w + 10,0],[server_input.h,server_input.h])
+
+autojoin_button = LinkedButton("Autojoin", "assets\\icon_ui_button.png",server_input,[0,100],[320,80])
+
+title_screen = RotatedImage("assets\\icon_title.png",[0,0,257,38])
+
 global OPEN
 global FOCUSED
 global ACCOUNT
@@ -132,6 +141,20 @@ FOCUSED = False
 SETTINGS = False
 ACCOUNT = False
 
+def ShowLog(window,log):
+	window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))
+	window.update()
+
+def Reset():
+	global OPEN
+	global FOCUSED
+	global ACCOUNT
+
+	OPEN = True
+	FOCUSED = False
+	SETTINGS = False
+	ACCOUNT = False
+
 def Init(s):
 	global settings
 
@@ -139,6 +162,31 @@ def Init(s):
 
 	username_input.text = settings.Get("szAccountName")
 	username_input.draw_text.update(username_input.text)
+
+def MainMenu(window):
+	server_input.x = window.H_WIDTH - 150
+	server_input.y = 200
+
+	title_screen.x = window.H_WIDTH - title_screen.w/2
+	title_screen.y = 50
+
+	server_input.update(window)
+
+	server_ready1.update()
+	server_ready2.update()
+
+	autojoin_button.update()
+
+	window.draw([title_screen,server_input] + server_ready1.draw() + server_ready2.draw() + autojoin_button.draw(),gm.GUI)
+	window.update()
+
+	if autojoin_button.status == gm.RELEASED:
+		return 1
+
+	if server_ready1.status == gm.RELEASED:
+		return server_input.text
+
+	return 0
 
 def Animate():
 	global OPEN
@@ -187,7 +235,7 @@ def DrawUI(window,player):
 		ACCOUNT = False
 
 	if not SETTINGS and not ACCOUNT and disconnect_button.status == gm.RELEASED:
-		pass
+		return True
 
 	if not SETTINGS and not ACCOUNT and settings_button.status == gm.RELEASED:
 		SETTINGS = True
@@ -234,3 +282,5 @@ def DrawUI(window,player):
 		)
 
 	window.draw([titanium,gear,plasma,magnesium],gm.GUI)
+
+	return False

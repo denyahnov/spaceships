@@ -16,6 +16,12 @@ def Get_IP():
 def Distance(point1,point2):
 	return math.sqrt( pow(point2[0]-point1[0],2) + pow(point2[1]-point1[1],2) )
 
+def GetCode(ip = Get_IP()):
+	return "".join([i if len(i) == 3 else "0" * (3 - len(i)) + i for i in ip.split(".")[-2:]])
+
+def CodetoIP(code):
+	return ".".join(Get_IP().split(".")[:-2] + [str(int(code[0:3])), str(int(code[3:]))])
+
 class Server():
 	def __init__(self, seed = random.randint(100000000,999999999), map_size = 5000):
 		self.RUNNING = False
@@ -125,6 +131,8 @@ class Server():
 				s.listen()
 
 				self.RUNNING = True
+
+				print("Server Code:",GetCode(HOST))
 
 				print("Server opened -> {}:{}".format(HOST,PORT))
 

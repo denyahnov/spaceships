@@ -1,5 +1,7 @@
 import GameMaker as gm
 
+from sys import exit
+
 # pyinstaller --noconfirm --onefile --windowed --icon "C:/Users/denya/OneDrive/Desktop/GitHub/spaceships/app_icon.ico" --name "Spaceships"  "C:/Users/denya/OneDrive/Desktop/GitHub/spaceships/main.py"
 
 import download
@@ -13,133 +15,159 @@ log = ["Loading Assets..."]
 
 window = gm.Window([1920,1080],"Spaceships",background_color=(10,10,10),fullscreen=True,fps=70)
 
-window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))
-window.update()
-
 import ui
 import network
 import settings
+
+ui.ShowLog(window,log)
 
 settings.Load()
 
 ui.Init(settings)
 
-player = Player(settings.Get("szAccountName"))
-arrow = Arrow()
-
 log.append("Loaded!")
-log.append("Finding Server...")
 
-window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))
-window.update()
+def MainMenu():
+	while window.RUNNING:
+		output = ui.MainMenu(window)
 
-servers = network.FindServers()
+		if output != 0: break
+	else:
+		exit("Game -> Window Closed!")
 
-if servers == None or len(servers) == 0:
-	from sys import exit
-	 
-	exit("Network -> No Available Servers")
+	if output == 1:
+		log.append("Finding Server...")
 
-log.append("Server Found!")
-log.append("Connecting...")
+		ui.ShowLog(window,log)
 
-chosen_server = servers[0]
+		servers = network.FindServers()
 
-window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))
-window.update()
+		if servers == None or len(servers) == 0:
+			exit("Network -> No Available Servers")
 
-client = network.Client(player)
-client.Connect(chosen_server["Address"],65432)
+		log.append("Server Found!")
+		log.append("Connecting...")
 
-log.append("Connected!")
-log.append("Creating World...")
+		chosen_server = servers[0]
 
-window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))
-window.update()
+		ui.ShowLog(window,log)
+	else:
+		chosen_server = network.CheckServer(network.CodetoIP(output))
 
-random.seed(chosen_server["WorldSeed"])
+		if chosen_server["Response"] == 0:
+			exit("Network -> Invalid Code '%s'" % output)
 
-ui.world_info.update(f"Map Size: {chosen_server['WorldSize']}\nMap Seed: {chosen_server['WorldSeed']}")
+	return chosen_server
 
-stars = GenerateStars(int(chosen_server["WorldSize"] * 1.5),chosen_server["WorldSize"])
-asteroids = GenerateAsteroids(int(chosen_server["WorldSize"] * 0.2),chosen_server["WorldSize"])
+def Main(chosen_server):
+	player = Player(settings.Get("szAccountName"))
+	arrow = Arrow()
 
-for asteroid in asteroids.items:
-	asteroid.draw_image.rotation += asteroid.rotation_speed * chosen_server["WorldTicks"]
+	ui.Reset()
+	
+	client = network.Client(player)
+	client.Connect(chosen_server["Address"],65432)
 
-	asteroid.position += AngleToPosition(90 - asteroid.angle, asteroid.velocity * chosen_server["WorldTicks"])
+	log.append("Connected!")
+	log.append("Creating World...")
 
-other_players = {}
+	ui.ShowLog(window,log)
 
-while client.data == {}:
-	network.sleep(network.TPS)
+	random.seed(chosen_server["WorldSeed"])
 
-player.setSpawnpoint(client.data["Spawnpoint"],True)
+	ui.world_info.update(f"Map Size: {chosen_server['WorldSize']}\nMap Seed: {chosen_server['WorldSeed']}")
 
-while window.RUNNING and client.CONNECTED:
-	player.ticks = client.data["Tick"]
+	stars = GenerateStars(int(chosen_server["WorldSize"] * 1.5),chosen_server["WorldSize"])
+	asteroids = GenerateAsteroids(int(chosen_server["WorldSize"] * 0.2),chosen_server["WorldSize"])
 
-	for values in client.data["Players"]:
-		enemy, (x, y, angle, velocity), projectiles = values["Port"],values["Position"],values["Projectiles"]
+	for asteroid in asteroids.items:
+		asteroid.draw_image.rotation += asteroid.rotation_speed * chosen_server["WorldTicks"]
 
-		if enemy not in other_players:
-			other_players[enemy] = {
-				"Spaceship": Spaceship(55,False),
-				"Mothership": Mothership(values["Username"],Vector2(*values["Spawnpoint"]),90,False),
-				"Projectiles":{"Laser": {}}
-			} 
+		asteroid.position += AngleToPosition(90 - asteroid.angle, asteroid.velocity * chosen_server["WorldTicks"])
 
-		for _type,entities in projectiles.items():
-			if _type == "Laser":
-				for start_tick,lx,ly,langle in projectiles["Laser"]:
-					if str(start_tick) not in other_players[enemy]["Projectiles"]["Laser"]:
-						other_players[enemy]["Projectiles"]["Laser"][str(start_tick)] = Laser(start_tick,Vector2(lx,ly),langle)
+	other_players = {}
 
-		other_players[enemy]["Spaceship"].draw(
-			window.screen,
-			player.screen_position(window.screen,[x,y]),
-			360 - angle, velocity
-		)
+	while client.data == {}:
+		network.sleep(network.TPS)
 
-		other_players[enemy]["Mothership"].draw(
-			window.screen,
-			player,
-		)
+	player.setSpawnpoint(client.data["Spawnpoint"],True)
 
-		for _type,projectiles in other_players[enemy]["Projectiles"].items():
-			for projectile in projectiles:
-				if projectiles[projectile] == None: continue
+	while window.RUNNING and client.CONNECTED:
+		player.ticks = client.data["Tick"]
 
-				projectiles[projectile].Move(player.ticks)
+		for values in client.data["Players"]:
+			enemy, (x, y, angle, velocity), projectiles = values["Port"],values["Position"],values["Projectiles"]
 
-				if not projectiles[projectile].Alive(player.ticks):
-					other_players[enemy]["Projectiles"][_type][projectile] = None
-				else:
-					projectiles[projectile].draw(window.screen,player)
-		
+			if enemy not in other_players:
+				other_players[enemy] = {
+					"Spaceship": Spaceship(55,False),
+					"Mothership": Mothership(values["Username"],Vector2(*values["Spawnpoint"]),90,False),
+					"Projectiles":{"Laser": {}}
+				} 
 
-	ui.OPEN = not window.get_key(Globals.K_UNFOCUS)
+			for _type,entities in projectiles.items():
+				if _type == "Laser":
+					for start_tick,lx,ly,langle in projectiles["Laser"]:
+						if str(start_tick) not in other_players[enemy]["Projectiles"]["Laser"]:
+							other_players[enemy]["Projectiles"]["Laser"][str(start_tick)] = Laser(start_tick,Vector2(lx,ly),langle)
 
-	if Globals.K_GUI in window.keys_up: ui.FOCUSED = not ui.FOCUSED
+			other_players[enemy]["Spaceship"].draw(
+				window.screen,
+				player.screen_position(window.screen,[x,y]),
+				360 - angle, velocity
+			)
 
-	ui.DrawUI(window,player)
+			other_players[enemy]["Mothership"].draw(
+				window.screen,
+				player,
+			)
 
-	stars.draw(window.screen,player,client.data["Tick"])
-	asteroids.draw(window.screen,player,client.data["Tick"])
+			for _type,projectiles in other_players[enemy]["Projectiles"].items():
+				for projectile in projectiles:
+					if projectiles[projectile] == None: continue
 
-	player.MoveTick(window,ui.FOCUSED)
+					projectiles[projectile].Move(player.ticks)
 
-	window.draw(player,gm.FOREGROUND)
+					if not projectiles[projectile].Alive(player.ticks):
+						other_players[enemy]["Projectiles"][_type][projectile] = None
+					else:
+						projectiles[projectile].draw(window.screen,player)
+			
 
-	if player.focused: 
-		arrow.draw(window,player)
+		ui.OPEN = not window.get_key(Globals.K_UNFOCUS)
 
-	if settings.Get("bShowFps"):
-		window.draw(Text("%s FPS" % int(window.clock.get_fps()),[10, window.HEIGHT - 30],font_size=20,color=(255,255,255)))
+		if Globals.K_GUI in window.keys_up: ui.FOCUSED = not ui.FOCUSED
 
-	if settings.Get("bShowCoords"):
-		window.draw(Text(player.position.rounded(1),[window.WIDTH - 10, window.HEIGHT - 10],font_size=20,color=(255,255,255),center=[gm.BOTTOM,gm.RIGHT]))
+		disconnect = ui.DrawUI(window,player)
 
-	window.update()
+		if disconnect: return 1
 
-settings.Save()
+		stars.draw(window.screen,player,client.data["Tick"])
+		asteroids.draw(window.screen,player,client.data["Tick"])
+
+		player.MoveTick(window,ui.FOCUSED)
+
+		window.draw(player,gm.FOREGROUND)
+
+		if player.focused: 
+			arrow.draw(window,player)
+
+		if settings.Get("bShowFps"):
+			window.draw(Text("%s FPS" % int(window.clock.get_fps()),[10, window.HEIGHT - 30],font_size=20,color=(255,255,255)))
+
+		if settings.Get("bShowCoords"):
+			window.draw(Text(player.position.rounded(1),[window.WIDTH - 10, window.HEIGHT - 10],font_size=20,color=(255,255,255),center=[gm.BOTTOM,gm.RIGHT]))
+
+		window.update()
+
+	settings.Save()
+
+	return 0
+
+if __name__ == '__main__':
+	output = 1
+
+	while output == 1:
+		chosen_server = MainMenu()
+
+		output = Main(chosen_server)

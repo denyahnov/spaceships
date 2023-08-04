@@ -13,6 +13,6 @@ origin = repo.remote("origin")
 assert origin.exists()
 origin.fetch()
 
-repo.index.add([directory + '\\output\\Spaceships.exe'])
+repo.index.add([directory + '\\dist\\Spaceships.exe'])
 repo.index.commit('Build Game')
 origin.push()

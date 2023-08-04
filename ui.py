@@ -1,8 +1,8 @@
 from currency import *
 
 class LinkedButton():
-	def __init__(self,text,image,parent,offset,size,hover_scaling=1.1,clicked_scaling=1.05):
-		self.text = Text(text,[0,0],color=(96,134,156),center=[gm.CENTER, gm.CENTER],font_size=24)
+	def __init__(self,text,image,parent,offset,size,hover_scaling=1.1,clicked_scaling=1.05,red=False):
+		self.text = Text(text,[0,0],color=(96,134,156) if not red else (242,43,99),center=[gm.CENTER, gm.CENTER],font_size=24)
 		self.size = [0,0] + size
 		self.image = RotatedImage(image,self.size)
 		self.parent = parent
@@ -104,7 +104,7 @@ inventory = Currency("",RotatedImage("assets\\icon_ui_background.png",[-500,160,
 
 disconnect_button = LinkedButton("Disconnect", "assets\\icon_ui_button.png",inventory.icon,[138,110],[220,60])
 settings_button = LinkedButton("Settings", "assets\\icon_ui_button.png",inventory.icon,[138,190],[220,60])
-exit_button = LinkedButton("Exit", "assets\\icon_ui_button.png",inventory.icon,[138,270],[220,60])
+exit_button = LinkedButton("Exit", "assets\\icon_ui_button_red.png",inventory.icon,[138,270],[220,60],red=True)
 
 account_button_1 = LinkedButton("", "assets\\icon_ui_square.png",inventory.icon,[55,95],[64,64])
 account_button_2 = LinkedButton("", "assets\\icon_ui_account.png",inventory.icon,[55,95],[64,64])
@@ -131,7 +131,7 @@ server_ready1 = LinkedButton("", "assets\\icon_ui_square.png",server_input,[serv
 server_ready2 = LinkedButton("", "assets\\icon_ui_check.png", server_input,[server_input.w + 10,0],[server_input.h,server_input.h])
 
 autojoin_button = LinkedButton("Autojoin", "assets\\icon_ui_button.png",server_input,[0,100],[320,80])
-exit_menu = LinkedButton("Exit", "assets\\icon_ui_button.png",server_input,[60,330],[200,80])
+exit_menu = LinkedButton("Exit", "assets\\icon_ui_button_red.png",server_input,[10,330],[300,80],red=True)
 
 title_screen = RotatedImage("assets\\icon_title.png",[0,0,800,120])
 
@@ -249,6 +249,9 @@ def DrawUI(window,player):
 		ACCOUNT = False
 
 	if not SETTINGS and not ACCOUNT and disconnect_button.status == gm.RELEASED:
+		server_input.text = ""
+		server_input.draw_text.update(server_input.text)
+
 		return True
 
 	if not SETTINGS and not ACCOUNT and settings_button.status == gm.RELEASED:

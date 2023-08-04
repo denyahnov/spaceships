@@ -2,7 +2,7 @@
 2D Multiplayer Game
 
 ## Client
-- Download `output/Spaceships.exe`
+- Download `dist/Spaceships.exe`
 
 ## Server
 - Download `server.py`

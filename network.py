@@ -37,7 +37,7 @@ def CheckServer(host):
 
 	try:
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-			s.settimeout(1.0)
+			s.settimeout(0.5)
 
 			s.connect((HOST, PORT))
 

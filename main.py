@@ -2,28 +2,39 @@ import GameMaker as gm
 
 from sys import exit
 
+import update
 import download
+
+load_log = ["Loading Assets..."]
 
 download.GetAssets()
 
 from player import *
 from currency import *
 
-log = ["Loading Assets..."]
+load_log.append("Checking for Updates...")
 
 window = gm.Window([1920,1080],"Spaceships",background_color=(10,10,10),fullscreen=True,fps=70)
+
+if update.CheckUpdate():
+
+	while window.RUNNING:
+		ui.ShowLog(window,["New Update Available!"])
+		window.update()
+
+	exit("Game -> Window Closed!")
 
 import ui
 import network
 import settings
 
-ui.ShowLog(window,log)
+ui.ShowLog(window,load_log)
 
 settings.Load()
 
 ui.Init(settings)
 
-log.append("Loaded!")
+load_log.append("Loaded!")
 
 def MainMenu():
 	while window.RUNNING:
@@ -34,21 +45,21 @@ def MainMenu():
 		exit("Game -> Window Closed!")
 
 	if output == 1:
-		log.append("Finding Server...")
+		load_log.append("Finding Server...")
 
-		ui.ShowLog(window,log)
+		ui.ShowLog(window,load_log)
 
 		servers = network.FindServers()
 
 		if servers == None or len(servers) == 0:
 			exit("Network -> No Available Servers")
 
-		log.append("Server Found!")
-		log.append("Connecting...")
+		load_log.append("Server Found!")
+		load_log.append("Connecting...")
 
 		chosen_server = servers[0]
 
-		ui.ShowLog(window,log)
+		ui.ShowLog(window,load_log)
 	else:
 		chosen_server = network.CheckServer(network.CodetoIP(output))
 
@@ -66,10 +77,10 @@ def Main(chosen_server):
 	client = network.Client(player)
 	client.Connect(chosen_server["Address"],65432)
 
-	log.append("Connected!")
-	log.append("Creating World...")
+	load_log.append("Connected!")
+	load_log.append("Creating World...")
 
-	ui.ShowLog(window,log)
+	ui.ShowLog(window,load_log)
 
 	random.seed(chosen_server["WorldSeed"])
 

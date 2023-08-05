@@ -14,11 +14,9 @@ def CheckUpdate():
 
 	server_time = calendar.timegm(time.strptime(server_date.split('T')[0] + " " + server_date.split('T')[-1].split(".")[0], '%Y-%m-%d %H:%M:%S'))
 
-	print(server_time,client_time)
-
 	requires_update = server_time > client_time
 
 	return requires_update
 
 if __name__ == '__main__':
-	CheckUpdate()
+	print(CheckUpdate())

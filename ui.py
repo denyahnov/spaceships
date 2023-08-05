@@ -1,5 +1,13 @@
 from currency import *
 
+import webbrowser
+
+webbrowser.register(
+	'chrome',
+	None,
+	webbrowser.BackgroundBrowser("C://Program Files//Google//Chrome//Application//chrome.exe")
+)
+
 class LinkedButton():
 	def __init__(self,text,image,parent,offset,size,hover_scaling=1.1,clicked_scaling=1.05,red=False):
 		self.text = Text(text,[0,0],color=(96,134,156) if not red else (242,43,99),center=[gm.CENTER, gm.CENTER],font_size=24)
@@ -135,6 +143,10 @@ exit_menu = LinkedButton("Exit", "assets\\icon_ui_button_red.png",server_input,[
 
 title_screen = RotatedImage("assets\\icon_title.png",[0,0,800,120])
 
+update_text = Text("New Update Available!",[0,0],font_size=50,color=(255,255,255),center=[gm.CENTER,gm.CENTER])
+download_text = Text("https://tinyurl.com/spaceshipsgame",[0,0],font_size=20,color=(88,146,232),center=[gm.CENTER,gm.CENTER])
+underline = Rectangle([0,0,0,0],foreground_color=(88,146,232),outline=0)
+
 global OPEN
 global FOCUSED
 global ACCOUNT
@@ -143,6 +155,28 @@ OPEN = True
 FOCUSED = False
 SETTINGS = False
 ACCOUNT = False
+
+def UpdateMenu(window):
+	update_text.x, update_text.y = window.H_WIDTH,window.H_HEIGHT
+	download_text.x, download_text.y = window.H_WIDTH,window.H_HEIGHT + 50
+
+	title_screen.x = window.H_WIDTH - title_screen.w/2
+	title_screen.y = 50
+
+	underline.x, underline.y, underline.w, underline.h = download_text.x - download_text.w/2, download_text.y + download_text.h/2, download_text.w, 2
+
+	x,y = pg.mouse.get_pos()
+
+	if (download_text.x - download_text.w/2) < x < (download_text.x + download_text.w/2) and (download_text.y - download_text.h/2) < y < (download_text.y + download_text.h/2 + 2):
+		window.draw(underline)
+
+		if pg.mouse.get_pressed(num_buttons=3)[0]:
+			webbrowser.get('chrome').open("https://tinyurl.com/spaceshipsgame")
+
+			window.RUNNING = False
+
+	window.draw([title_screen,update_text,download_text])
+	window.update()
 
 def ShowLog(window,log):
 	window.draw(Text("\n".join(log),[window.H_WIDTH,window.H_HEIGHT],color=(255,255,255),center=[gm.CENTER,gm.CENTER],font_size=32))

@@ -16,17 +16,15 @@ load_log.append("Checking for Updates...")
 
 window = gm.Window([1920,1080],"Spaceships",background_color=(10,10,10),fullscreen=True,fps=70)
 
-if update.CheckUpdate():
-
-	while window.RUNNING:
-		ui.ShowLog(window,["New Update Available!"])
-		window.update()
-
-	exit("Game -> Window Closed!")
-
 import ui
 import network
 import settings
+
+if update.CheckUpdate():
+	while window.RUNNING:
+		ui.UpdateMenu(window)
+
+	exit("Game -> Window Closed!")
 
 ui.ShowLog(window,load_log)
 

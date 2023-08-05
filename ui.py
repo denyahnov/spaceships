@@ -144,7 +144,7 @@ exit_menu = LinkedButton("Exit", "assets\\icon_ui_button_red.png",server_input,[
 title_screen = RotatedImage("assets\\icon_title.png",[0,0,800,120])
 
 update_text = Text("New Update Available!",[0,0],font_size=50,color=(255,255,255),center=[gm.CENTER,gm.CENTER])
-download_text = Text("https://tinyurl.com/spaceshipsgame",[0,0],font_size=20,color=(88,146,232),center=[gm.CENTER,gm.CENTER])
+download_text = Text("Click Me to Download",[0,0],font_size=20,color=(88,146,232),center=[gm.CENTER,gm.CENTER])
 underline = Rectangle([0,0,0,0],foreground_color=(88,146,232),outline=0)
 
 global OPEN
@@ -171,7 +171,7 @@ def UpdateMenu(window):
 		window.draw(underline)
 
 		if pg.mouse.get_pressed(num_buttons=3)[0]:
-			webbrowser.get('chrome').open("https://tinyurl.com/spaceshipsgame")
+			webbrowser.get('chrome').open("https://raw.githubusercontent.com/denyahnov/spaceships/main/dist/Spaceships.exe")
 
 			window.RUNNING = False
 
